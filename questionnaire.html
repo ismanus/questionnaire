@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>点读机 - 用户自助体验问卷</title>
+<style>
+:root {
+  --bg: #f5f6f7;
+  --card: #ffffff;
+  --primary: #3370ff;
+  --primary-hover: #2860e1;
+  --primary-light: #e8efff;
+  --text: #1f2329;
+  --text-secondary: #646a73;
+  --text-placeholder: #8f959e;
+  --border: #dee0e3;
+  --border-light: #ecedf0;
+  --shadow: 0 1px 2px 0 rgba(0,0,0,0.04), 0 1px 4px 0 rgba(0,0,0,0.06);
+  --shadow-hover: 0 2px 8px 0 rgba(0,0,0,0.08), 0 1px 4px 0 rgba(0,0,0,0.06);
+  --radius: 8px;
+  --radius-sm: 6px;
+  --danger: #f54a45;
+  --success: #34c759;
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --font: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ── Progress Bar ── */
+.progress-wrap {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--card);
+  border-bottom: 1px solid var(--border-light);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.progress-wrap .icon { font-size: 20px; }
+.progress-wrap .title-sm { font-size: 14px; color: var(--text); white-space: nowrap; font-weight: 500; }
+.progress-bar-outer {
+  flex: 1; height: 6px; background: var(--border-light);
+  border-radius: 3px; overflow: hidden;
+}
+.progress-bar-inner {
+  height: 100%; width: 0%;
+  background: var(--primary);
+  border-radius: 3px;
+  transition: width 0.4s var(--transition);
+}
+.progress-text { font-size: 12px; color: var(--text-secondary); white-space: nowrap; min-width: 32px; text-align: right; }
+.autosave-indicator { font-size: 12px; color: var(--success); white-space: nowrap; opacity: 0; transition: opacity 0.3s; }
+.autosave-indicator.show { opacity: 1; }
+
+/* ── Main Container ── */
+.container {
+  max-width: 740px; margin: 0 auto; padding: 16px 16px 80px;
+}
+
+/* ── Header Card ── */
+.header-card {
+  background: var(--card); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 28px 32px; margin-bottom: 12px;
+}
+.header-card h1 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+.header-card .desc { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+.header-card .desc ul { padding-left: 18px; margin: 4px 0; }
+.header-card .desc ul li { margin-bottom: 2px; }
+.header-card .desc ol { padding-left: 18px; margin: 4px 0; }
+.header-card .desc ol li { margin-bottom: 4px; }
+.hl-task { color: #e67e22; font-weight: 500; }
+.hl-sus { color: #2980b9; font-weight: 500; }
+
+/* ── Section Card ── */
+.section {
+  background: var(--card); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 24px 32px; margin-bottom: 12px;
+  transition: box-shadow var(--transition);
+}
+.section:hover { box-shadow: var(--shadow-hover); }
+
+.section-title {
+  font-size: 17px; font-weight: 600; margin-bottom: 4px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--primary); color: #fff; font-size: 13px; font-weight: 600;
+  flex-shrink: 0;
+}
+.section-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+
+/* ── Scenario Block ── */
+.scenario {
+  background: #f8f9ff; border-left: 3px solid var(--primary);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 12px 16px; margin-bottom: 18px;
+  font-size: 14px; color: var(--text-secondary); line-height: 1.7;
+}
+.scenario b { color: var(--primary); }
+
+/* ── Form Groups ── */
+.form-group { margin-bottom: 16px; }
+.form-group:last-child { margin-bottom: 0; }
+
+.form-label {
+  display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px;
+  color: var(--text);
+}
+.required { color: var(--danger); margin-left: 2px; }
+.form-label .required { color: var(--danger); margin-left: 2px; }
+.form-sublabel { font-size: 12px; color: var(--text-placeholder); font-weight: 400; margin-left: 6px; }
+
+/* ── Text Input ── */
+.text-input {
+  width: 100%; max-width: 360px; padding: 8px 12px;
+  font-size: 14px; font-family: var(--font);
+  background: var(--bg); border: 1px solid transparent;
+  border-radius: var(--radius-sm); outline: none;
+  color: var(--text); transition: all var(--transition);
+}
+.text-input:hover { background: #eeeff1; }
+.text-input:focus { background: var(--card); border-color: var(--primary); box-shadow: 0 0 0 2px rgba(51,112,255,0.12); }
+.text-input::placeholder { color: var(--text-placeholder); }
+
+/* ── Textarea ── */
+.textarea {
+  width: 100%; padding: 10px 12px;
+  font-size: 14px; font-family: var(--font);
+  background: var(--bg); border: 1px solid transparent;
+  border-radius: var(--radius-sm); outline: none;
+  color: var(--text); resize: vertical; min-height: 72px;
+  transition: all var(--transition);
+  line-height: 1.6;
+}
+.textarea:hover { background: #eeeff1; }
+.textarea:focus { background: var(--card); border-color: var(--primary); box-shadow: 0 0 0 2px rgba(51,112,255,0.12); }
+.textarea::placeholder { color: var(--text-placeholder); }
+
+/* ── Radio Group ── */
+.radio-group { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.radio-item { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: var(--text); user-select: none; }
+.radio-item input[type="radio"] { display: none; }
+.radio-circle {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--border); flex-shrink: 0;
+  position: relative;
+  transition: all var(--transition);
+}
+.radio-item:hover .radio-circle { border-color: var(--primary); }
+.radio-item input:checked + .radio-circle {
+  border-color: var(--primary); background: var(--primary);
+}
+.radio-item input:checked + .radio-circle::after {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px; height: 6px; border-radius: 50%; background: #fff;
+}
+
+/* ── Likert Matrix ── */
+.matrix-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.matrix {
+  width: 100%; border-collapse: collapse; font-size: 14px;
+}
+.matrix thead th {
+  text-align: center; font-weight: 500; color: var(--text-secondary);
+  padding: 8px 4px; font-size: 13px; white-space: nowrap;
+  border-bottom: 1px solid var(--border-light);
+}
+.matrix thead th:first-child { text-align: left; padding-left: 0; }
+.matrix tbody td {
+  padding: 10px 4px; text-align: center;
+  border-bottom: 1px solid var(--border-light);
+}
+.matrix tbody td:first-child { text-align: left; padding-left: 0; color: var(--text); }
+.matrix tbody tr:hover td { background: #fafbfc; }
+.matrix .radio-cell { cursor: pointer; }
+.matrix .radio-cell input[type="radio"] { display: none; }
+.matrix .radio-dot {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--border);
+  transition: all var(--transition);
+  position: relative;
+}
+.matrix .radio-cell:hover .radio-dot { border-color: var(--primary); }
+.matrix .radio-cell input:checked ~ .radio-dot {
+  border-color: var(--primary); background: var(--primary);
+}
+.matrix .radio-cell input:checked ~ .radio-dot::after {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px; height: 6px; border-radius: 50%; background: #fff;
+}
+
+/* ── Divider ── */
+.divider {
+  border: none; border-top: 1px solid var(--border-light);
+  margin: 16px 0;
+}
+
+/* ── Submit Area ── */
+.submit-area { text-align: center; padding: 20px 0 40px; }
+.btn-submit {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 12px 48px; font-size: 15px; font-weight: 500; font-family: var(--font);
+  color: #fff; background: var(--primary); border: none;
+  border-radius: var(--radius); cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: 0 2px 6px rgba(51,112,255,0.3);
+}
+.btn-submit:hover { background: var(--primary-hover); box-shadow: 0 4px 12px rgba(51,112,255,0.4); transform: translateY(-1px); }
+.btn-submit:active { transform: translateY(0); }
+.btn-submit:disabled { background: #a8c1ff; cursor: not-allowed; box-shadow: none; transform: none; }
+
+.btn-clear {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 10px 24px; font-size: 13px; font-family: var(--font);
+  color: var(--text-secondary); background: var(--card);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  cursor: pointer; margin-left: 12px;
+  transition: all var(--transition);
+}
+.btn-clear:hover { background: var(--bg); border-color: #c0c3c9; }
+
+/* ── Toast / Message ── */
+.toast {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  padding: 10px 24px; border-radius: 20px; font-size: 14px;
+  background: var(--text); color: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1000; opacity: 0; transition: opacity 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+.toast.success { background: var(--success); }
+.toast.error { background: var(--danger); }
+
+/* ── Thank You Page ── */
+.thank-you {
+  display: none;
+  text-align: center; padding: 60px 24px;
+}
+.thank-you.show { display: block; }
+.thank-you .icon-big { font-size: 64px; margin-bottom: 16px; }
+.thank-you h2 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+.thank-you p { font-size: 15px; color: var(--text-secondary); }
+
+/* ── Validation ── */
+.field-error .text-input,
+.field-error .textarea { border-color: var(--danger); background: #fff5f5; }
+.field-error-msg { font-size: 12px; color: var(--danger); margin-top: 4px; display: none; }
+.field-error .field-error-msg { display: block; }
+
+.required-hint { font-size: 12px; color: var(--danger); margin-bottom: 12px; display: none; }
+.required-hint.show { display: block; }
+
+/* ── Back to Top ── */
+.back-to-top {
+  position: fixed; bottom: 32px; right: 32px;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--card); border: 1px solid var(--border);
+  box-shadow: var(--shadow); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: var(--text-secondary);
+  transition: all var(--transition);
+  z-index: 50; opacity: 0; pointer-events: none;
+}
+.back-to-top.show { opacity: 1; pointer-events: auto; }
+.back-to-top:hover { background: var(--bg); box-shadow: var(--shadow-hover); }
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .container { padding: 8px 8px 80px; }
+  .section { padding: 18px 16px; }
+  .header-card { padding: 20px 16px; }
+  .header-card h1 { font-size: 19px; }
+  .radio-group { flex-direction: column; gap: 6px; }
+  .matrix { font-size: 12px; }
+  .matrix thead th { font-size: 11px; padding: 6px 2px; }
+  .matrix tbody td { padding: 8px 2px; }
+  .matrix .radio-dot { width: 18px; height: 18px; }
+  .back-to-top { bottom: 16px; right: 16px; }
+  .progress-wrap { padding: 8px 12px; }
+  .progress-wrap .title-sm { font-size: 12px; }
+  .btn-submit { width: 100%; justify-content: center; }
+  .btn-clear { margin-left: 0; margin-top: 8px; width: 100%; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Progress Bar -->
+<div class="progress-wrap">
+  <span class="icon">📋</span>
+  <span class="title-sm">点读机体验问卷</span>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar"></div></div>
+  <span class="progress-text" id="progressText">0%</span>
+  <span class="autosave-indicator" id="autosaveIndicator">已自动保存 ✓</span>
+</div>
+
+<div class="container" id="formContainer">
+
+<!-- ==================== Header ==================== -->
+<div class="header-card">
+  <h1>点读机 — 自助体验问卷</h1>
+  <div class="desc">
+    <p style="margin-bottom:6px;">在阅读或学习大学课程的学习资料时，可随时选取资料中想要扩展或有疑惑的内容，使用"AI点读机"集成丰富模块基于资料上下文为你生成丰富的多模态教学辅导内容。请你依照以下测试流程进行测试体验：</p>
+    <ol>
+      <li>根据<span class="hl-task">测试任务及体验记录</span>表格内容指引，完成每个测试后记录下对应任务的体验反馈；</li>
+      <li>在完成所有测试任务后，根据体验感受填写<span class="hl-sus">系统整体可用性报告问卷</span>；</li>
+      <li>记录其他体验反馈与建议</li>
+    </ol>
+    <p style="margin-top:8px;">Demo 链接：<a href="https://demo-ch-399799690621.asia-northeast1.run.app" target="_blank">https://demo-ch-399799690621.asia-northeast1.run.app</a></p>
+ <!--    <p style="margin-top:4px; font-size:12px; color: var(--text-placeholder);">由于早期版本使用的是 Google Gemini AI 模型，所有需要使用 VPN 翻墙才能流畅体验，建议使用日本、美国节点。</p> -->
+  </div>
+</div>
+
+<!-- ==================== 基本信息 ==================== -->
+<div class="section" data-section="basic">
+  <div class="section-title">基本信息</div>
+  <div class="section-subtitle">请填写以下信息，方便我们后续跟进</div>
+
+  <div class="form-group">
+    <label class="form-label">联系方式 <span class="required">*</span></label>
+    <input type="text" class="text-input" name="name" placeholder="请输入你的小红书账号、微信号或QQ号" data-field="name">
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">填写日期 <span class="required">*</span></label>
+    <input type="date" class="text-input" name="date" data-field="date" style="max-width:240px;">
+  </div>
+
+
+  <div class="form-group">
+    <label class="form-label">你是否了解“点读机”这个概念？<span class="required">*</span></label>
+    <div class="radio-group" data-field="familiarity">
+      <label class="radio-item"><input type="radio" name="familiarity" value="完全不了解"><span class="radio-circle"></span>完全不了解</label>
+      <label class="radio-item"><input type="radio" name="familiarity" value="听说过"><span class="radio-circle"></span>听说过</label>
+      <label class="radio-item"><input type="radio" name="familiarity" value="看过演示"><span class="radio-circle"></span>看过演示</label>
+      <label class="radio-item"><input type="radio" name="familiarity" value="之前用过"><span class="radio-circle"></span>之前用过</label>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== Task 1 ==================== -->
+<div class="section" data-section="task1">
+  <div class="section-title"><span class="section-num">1</span>任务一</div>
+
+  <div class="scenario">
+    <b>场景：</b>在软件中打开一份学习资料 PDF，在资料中<b>划取一个词或一段文字</b>，使用并查看<b>多维解释</b>模块生成的教学辅导内容。
+
+
+  <div class="form-group">
+    <label class="form-label">体验感受 <span class="form-sublabel">请描述你在体验过程中遇到的卡点、困惑、惊喜或其他任何体验感受</span></label>
+    <textarea class="textarea" name="t1_experience" placeholder="请自由描述你的体验感受……" data-field="t1_experience"></textarea>
+  </div>
+
+  <hr class="divider">
+
+  <div class="form-group">
+    <label class="form-label">评分 <span class="required">*</span></label>
+    <div class="matrix-wrap">
+      <table class="matrix" data-matrix="t1_rating">
+        <thead>
+          <tr><th></th><th>非常同意</th><th>同意</th><th>中立</th><th>不同意</th><th>非常不同意</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>有用性：这个功能达到了我的预期效果</td>
+            <td class="radio-cell"><label><input type="radio" name="t1_useful" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t1_useful" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t1_useful" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t1_useful" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t1_useful" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+          <tr>
+            <td>易用性：这个功能使用起来很简单</td>
+            <td class="radio-cell"><label><input type="radio" name="t1_ease" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t1_ease" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t1_ease" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t1_ease" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t1_ease" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+          <tr>
+            <td>满意度：这个功能的使用体验很好</td>
+            <td class="radio-cell"><label><input type="radio" name="t1_satisfy" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t1_satisfy" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t1_satisfy" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t1_satisfy" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t1_satisfy" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">其他反馈与意见</label>
+    <textarea class="textarea" name="t1_extra" placeholder="任何其他想告诉我们的反馈……" data-field="t1_extra"></textarea>
+  </div>
+</div>
+
+<!-- ==================== Task 2 ==================== -->
+<div class="section" data-section="task2">
+  <div class="section-title"><span class="section-num">2</span>任务二</div>
+
+  <div class="scenario">
+    <b>场景：</b>在刚才打开的资料中，使用<b>框选模式</b>选取一段你想展开了解的内容（可以是大段文字、表格、图表或示意图），使用并查看<b>实验沙盒</b>模块生成的教学辅导内容。再将这个模块 <b>固定</b>到常用模块中，方便下次快速使用。
+  </div>
+
+
+  <div class="form-group">
+    <label class="form-label">体验感受 <span class="form-sublabel">请描述你在体验过程中遇到的卡点、困惑、惊喜或其他任何体验感受</span></label>
+    <textarea class="textarea" name="t2_experience" placeholder="请自由描述你的体验感受……" data-field="t2_experience"></textarea>
+  </div>
+
+  <hr class="divider">
+
+  <div class="form-group">
+    <label class="form-label">评分 <span class="required">*</span></label>
+    <div class="matrix-wrap">
+      <table class="matrix" data-matrix="t2_rating">
+        <thead>
+          <tr><th></th><th>非常同意</th><th>同意</th><th>中立</th><th>不同意</th><th>非常不同意</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>有用性：这个功能达到了我的预期效果</td>
+            <td class="radio-cell"><label><input type="radio" name="t2_useful" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t2_useful" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t2_useful" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t2_useful" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t2_useful" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+          <tr>
+            <td>易用性：这个功能使用起来很简单</td>
+            <td class="radio-cell"><label><input type="radio" name="t2_ease" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t2_ease" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t2_ease" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t2_ease" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t2_ease" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+          <tr>
+            <td>满意度：这个功能的使用体验很好</td>
+            <td class="radio-cell"><label><input type="radio" name="t2_satisfy" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t2_satisfy" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t2_satisfy" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t2_satisfy" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t2_satisfy" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">其他反馈与意见</label>
+    <textarea class="textarea" name="t2_extra" placeholder="任何其他想告诉我们的反馈……" data-field="t2_extra"></textarea>
+  </div>
+</div>
+
+<!-- ==================== Task 3 ==================== -->
+<div class="section" data-section="task3">
+  <div class="section-title"><span class="section-num">3</span>任务三</div>
+
+  <div class="scenario">
+    <b>场景：</b>你在资料中看到一段描述某个过程或步骤的内容（公式、推导过程、解题步骤或事件发展等）。请你使用<b>框选模式</b>选取这段内容，然后使用并查看<b>过程展开</b>模块生成的教学辅导内容。再将这个模块 <b>固定</b>到常用模块中，方便下次快速使用。</b>。
+  </div>
+
+
+  <div class="form-group">
+    <label class="form-label">体验感受 <span class="form-sublabel">请描述你在体验过程中遇到的卡点、困惑、惊喜或其他任何体验感受</span></label>
+    <textarea class="textarea" name="t3_experience" placeholder="请自由描述你的体验感受……" data-field="t3_experience"></textarea>
+  </div>
+
+  <hr class="divider">
+
+  <div class="form-group">
+    <label class="form-label">评分 <span class="required">*</span></label>
+    <div class="matrix-wrap">
+      <table class="matrix" data-matrix="t3_rating">
+        <thead>
+          <tr><th></th><th>非常同意</th><th>同意</th><th>中立</th><th>不同意</th><th>非常不同意</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>有用性：这个功能达到了我的预期效果</td>
+            <td class="radio-cell"><label><input type="radio" name="t3_useful" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t3_useful" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t3_useful" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t3_useful" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t3_useful" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+          <tr>
+            <td>易用性：这个功能使用起来很简单</td>
+            <td class="radio-cell"><label><input type="radio" name="t3_ease" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t3_ease" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t3_ease" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t3_ease" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t3_ease" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+          <tr>
+            <td>满意度：这个功能的使用体验很好</td>
+            <td class="radio-cell"><label><input type="radio" name="t3_satisfy" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t3_satisfy" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t3_satisfy" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t3_satisfy" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t3_satisfy" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">其他反馈与意见</label>
+    <textarea class="textarea" name="t3_extra" placeholder="任何其他想告诉我们的反馈……" data-field="t3_extra"></textarea>
+  </div>
+</div>
+
+<!-- ==================== Task 4 ==================== -->
+<div class="section" data-section="task4">
+  <div class="section-title"><span class="section-num">4</span>任务四</div>
+
+  <div class="scenario">
+    <b>场景：</b>你想快速查看当前页面的重点内容。请使用<b>一键提炼</b>，查看 AI 自动标记出的本页重点内容。再点击任一高亮内容，使用模块生成教学辅导内容。
+
+
+  <div class="form-group">
+    <label class="form-label">体验感受 <span class="form-sublabel">请描述你在体验过程中遇到的卡点、困惑、惊喜或其他任何体验感受</span></label>
+    <textarea class="textarea" name="t4_experience" placeholder="请自由描述你的体验感受……" data-field="t4_experience"></textarea>
+  </div>
+
+  <hr class="divider">
+
+  <div class="form-group">
+    <label class="form-label">评分 <span class="required">*</span></label>
+    <div class="matrix-wrap">
+      <table class="matrix" data-matrix="t4_rating">
+        <thead>
+          <tr><th></th><th>非常同意</th><th>同意</th><th>中立</th><th>不同意</th><th>非常不同意</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>有用性：这个功能达到了我的预期效果</td>
+            <td class="radio-cell"><label><input type="radio" name="t4_useful" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t4_useful" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t4_useful" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t4_useful" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t4_useful" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+          <tr>
+            <td>易用性：这个功能使用起来很简单</td>
+            <td class="radio-cell"><label><input type="radio" name="t4_ease" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t4_ease" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t4_ease" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t4_ease" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t4_ease" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+          <tr>
+            <td>满意度：这个功能的使用体验很好</td>
+            <td class="radio-cell"><label><input type="radio" name="t4_satisfy" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t4_satisfy" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t4_satisfy" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t4_satisfy" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t4_satisfy" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">其他反馈与意见</label>
+    <textarea class="textarea" name="t4_extra" placeholder="任何其他想告诉我们的反馈……" data-field="t4_extra"></textarea>
+  </div>
+</div>
+
+<!-- ==================== Task 5 ==================== -->
+<div class="section" data-section="task5">
+  <div class="section-title"><span class="section-num">5</span>任务五</div>
+
+  <div class="scenario">
+    <b>场景：</b>在刚才的点读体验过程中，已产生若干个<b>点读记录</b>。现在请你找到回顾任一记录，并查看记录中保存的模块教学辅导内容。
+  </div>
+
+
+  <div class="form-group">
+    <label class="form-label">体验感受 <span class="form-sublabel">请描述你在体验过程中遇到的卡点、困惑、惊喜或其他任何体验感受</span></label>
+    <textarea class="textarea" name="t5_experience" placeholder="请自由描述你的体验感受……" data-field="t5_experience"></textarea>
+  </div>
+
+  <hr class="divider">
+
+  <div class="form-group">
+    <label class="form-label">评分 <span class="required">*</span></label>
+    <div class="matrix-wrap">
+      <table class="matrix" data-matrix="t5_rating">
+        <thead>
+          <tr><th></th><th>非常同意</th><th>同意</th><th>中立</th><th>不同意</th><th>非常不同意</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>有用性：这个功能达到了我的预期效果</td>
+            <td class="radio-cell"><label><input type="radio" name="t5_useful" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t5_useful" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t5_useful" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t5_useful" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t5_useful" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+          <tr>
+            <td>易用性：这个功能使用起来很简单</td>
+            <td class="radio-cell"><label><input type="radio" name="t5_ease" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t5_ease" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t5_ease" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t5_ease" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t5_ease" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+          <tr>
+            <td>满意度：这个功能的使用体验很好</td>
+            <td class="radio-cell"><label><input type="radio" name="t5_satisfy" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t5_satisfy" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t5_satisfy" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t5_satisfy" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t5_satisfy" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">其他反馈与意见</label>
+    <textarea class="textarea" name="t5_extra" placeholder="任何其他想告诉我们的反馈……" data-field="t5_extra"></textarea>
+  </div>
+</div>
+
+<!-- ==================== Task 6 ==================== -->
+<div class="section" data-section="task6">
+  <div class="section-title"><span class="section-num">6</span>任务六</div>
+
+  <div class="scenario">
+    <b>场景：经过以上几个任务的体验，你已大致了解了点读机的主要功能和用法。现在请你模拟真实学习情境，并试着完整经历以下流程：</b><br>
+    1. 打开新的学习资料 PDF 或使继续使用刚才打开的学习资料<br>
+    2. 划选任一感兴趣的文字内容，查看更多模块生成的辅导内容<br>
+    3. 框选大段内容、图表或图片，查看更多模块生成的辅导内容<br>
+    4. 将模块按钮固定到常用模块中或将模块按钮从常用模块中移除<br>
+    5. 选择一个“一键提炼”出的页面重点，并查看模块针对其生成的辅导内容<br>
+    6. 查看并回顾点读记录<br>
+     在这个过程中，你可以尽情探索点读机的各种功能，体验它在不同使用场景下的表现。
+  </div>
+
+
+  <div class="form-group">
+    <label class="form-label">流畅度感受 <span class="form-sublabel">请描述你在自由操作过程中遇到的卡点、绕路、功能缺失或其他任何体验感受</span></label>
+    <textarea class="textarea" name="t6_experience" placeholder="请自由描述你的体验感受……" data-field="t6_experience"></textarea>
+  </div>
+
+  <hr class="divider">
+
+  <div class="form-group">
+    <label class="form-label">评分 <span class="required">*</span></label>
+    <div class="matrix-wrap">
+      <table class="matrix" data-matrix="t6_rating">
+        <thead>
+          <tr><th></th><th>非常同意</th><th>同意</th><th>中立</th><th>不同意</th><th>非常不同意</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>有用性：这个功能达到了我的预期效果</td>
+            <td class="radio-cell"><label><input type="radio" name="t6_useful" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t6_useful" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t6_useful" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t6_useful" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t6_useful" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+          <tr>
+            <td>易用性：这个功能使用起来很简单</td>
+            <td class="radio-cell"><label><input type="radio" name="t6_ease" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t6_ease" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t6_ease" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t6_ease" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t6_ease" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+          <tr>
+            <td>满意度：这个功能的使用体验很好</td>
+            <td class="radio-cell"><label><input type="radio" name="t6_satisfy" value="非常同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t6_satisfy" value="同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t6_satisfy" value="中立"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t6_satisfy" value="不同意"><span class="radio-dot"></span></label></td>
+            <td class="radio-cell"><label><input type="radio" name="t6_satisfy" value="非常不同意"><span class="radio-dot"></span></label></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">其他反馈与意见</label>
+    <textarea class="textarea" name="t6_extra" placeholder="任何其他想告诉我们的反馈……" data-field="t6_extra"></textarea>
+  </div>
+</div>
+
+<!-- ==================== SUS ==================== -->
+<div class="section" data-section="sus">
+  <div class="section-title">整体评价（SUS 系统可用性量表）</div>
+  <div class="section-subtitle">以下问题请根据你对<b>点读机的整体印象</b>来回答。不用想太多，凭第一感觉选。</div>
+
+  <div class="required-hint" id="susHint">请完成以下所有评分项</div>
+
+  <div class="matrix-wrap">
+    <table class="matrix" data-matrix="sus">
+      <thead>
+        <tr><th style="min-width:240px;"></th><th>非常同意</th><th>同意</th><th>中立</th><th>不同意</th><th>非常不同意</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>我想我会经常使用这个点读机<span class="required">*</span></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_1" value="非常同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_1" value="同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_1" value="中立"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_1" value="不同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_1" value="非常不同意"><span class="radio-dot"></span></label></td>
+        </tr>
+        <tr><td>我觉得这个点读机存在不必要的复杂操作<span class="required">*</span></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_2" value="非常同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_2" value="同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_2" value="中立"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_2" value="不同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_2" value="非常不同意"><span class="radio-dot"></span></label></td>
+        </tr>
+        <tr><td>我觉得这个点读机挺容易使用的<span class="required">*</span></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_3" value="非常同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_3" value="同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_3" value="中立"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_3" value="不同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_3" value="非常不同意"><span class="radio-dot"></span></label></td>
+        </tr>
+        <tr><td>我觉得我需要别人教我如何使用这个点读机<span class="required">*</span></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_4" value="非常同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_4" value="同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_4" value="中立"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_4" value="不同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_4" value="非常不同意"><span class="radio-dot"></span></label></td>
+        </tr>
+        <tr><td>我觉得这个点读机中的模块融合的很好<span class="required">*</span></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_5" value="非常同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_5" value="同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_5" value="中立"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_5" value="不同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_5" value="非常不同意"><span class="radio-dot"></span></label></td>
+        </tr>
+        <tr><td>我觉得这个点读机有太多不一致的地方（交互、模块内容）<span class="required">*</span></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_6" value="非常同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_6" value="同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_6" value="中立"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_6" value="不同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_6" value="非常不同意"><span class="radio-dot"></span></label></td>
+        </tr>
+        <tr><td>我觉得大多数人都能很快学会使用这个点读机<span class="required">*</span></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_7" value="非常同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_7" value="同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_7" value="中立"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_7" value="不同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_7" value="非常不同意"><span class="radio-dot"></span></label></td>
+        </tr>
+        <tr><td>我觉得这个点读机使用起来很繁琐<span class="required">*</span></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_8" value="非常同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_8" value="同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_8" value="中立"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_8" value="不同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_8" value="非常不同意"><span class="radio-dot"></span></label></td>
+        </tr>
+        <tr><td>我觉得我能够信任这个点读机生成的教学辅导内容<span class="required">*</span></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_9" value="非常同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_9" value="同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_9" value="中立"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_9" value="不同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_9" value="非常不同意"><span class="radio-dot"></span></label></td>
+        </tr>
+        <tr><td>我觉得使用这个点读机的学习成本很高<span class="required">*</span></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_10" value="非常同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_10" value="同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_10" value="中立"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_10" value="不同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_10" value="非常不同意"><span class="radio-dot"></span></label></td>
+        </tr>
+        <tr><td>我觉得这个点读机对我真实的学习很有帮助<span class="required">*</span></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_11" value="非常同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_11" value="同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_11" value="中立"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_11" value="不同意"><span class="radio-dot"></span></label></td>
+          <td class="radio-cell"><label><input type="radio" name="sus_11" value="非常不同意"><span class="radio-dot"></span></label></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== 总体回顾 ==================== -->
+<div class="section" data-section="overall">
+  <div class="section-title">总体回顾</div>
+  <div class="section-subtitle">以下问题的回答会将会很好的帮助我们了解你的整体体验并对功能进行改进。</div>
+
+  <div class="form-group">
+    <label class="form-label">1. 你觉得点读机里的哪个模块<b>最有用</b>最有用？为什么？</label>
+    <textarea class="textarea" name="overall_best" placeholder="请具体描述……" data-field="overall_best"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">2. 你觉得点读机里的哪个模块<b>最没用或最令人困惑</b>？为什么？</label>
+    <textarea class="textarea" name="overall_worst" placeholder="请具体描述……" data-field="overall_worst"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">3. 在刚才的体验过程中，是否存在让你感到<b>困惑</b>的时刻？请尽量描述当时的情况。</label>
+    <textarea class="textarea" name="overall_frustration" placeholder="请描述当时的具体情况……" data-field="overall_frustration"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">4. 在刚才的体验过程中，是否存在让你感到<b>惊喜或满意</b>的时刻？</label>
+    <textarea class="textarea" name="overall_delight" placeholder="请描述让你惊喜的体验……" data-field="overall_delight"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">5. 如果让你给这个点读机提一个你<b>最想改进</b>的点，你会说什么？</label>
+    <textarea class="textarea" name="overall_suggestion" placeholder="请写下你的建议……" data-field="overall_suggestion"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">6. 经过这次体验，你有有多大意愿<b>在真实学习情境中使用点读机</b>？ <span class="required">*</span></label>
+    <div class="radio-group" data-field="overall_willingness">
+      <label class="radio-item"><input type="radio" name="overall_willingness" value="非常愿意"><span class="radio-circle"></span>非常愿意</label>
+      <label class="radio-item"><input type="radio" name="overall_willingness" value="愿意"><span class="radio-circle"></span>愿意</label>
+      <label class="radio-item"><input type="radio" name="overall_willingness" value="不确定"><span class="radio-circle"></span>不确定</label>
+      <label class="radio-item"><input type="radio" name="overall_willingness" value="不太愿意"><span class="radio-circle"></span>不太愿意</label>
+      <label class="radio-item"><input type="radio" name="overall_willingness" value="完全不愿意"><span class="radio-circle"></span>完全不愿意</label>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">7. 还有什么想告诉我们的吗？（选填）</label>
+    <textarea class="textarea" name="overall_extra" placeholder="畅所欲言……" data-field="overall_extra"></textarea>
+  </div>
+</div>
+
+<!-- ==================== Submit ==================== -->
+<div class="submit-area" id="submitArea">
+  <button class="btn-submit" id="btnSubmit" onclick="submitForm()">
+    <span>提交问卷</span>
+  </button>
+  <button class="btn-clear" onclick="clearForm()">清空全部内容</button>
+  <div class="required-hint" id="submitHint" style="margin-top:12px; text-align:center;">请完成所有带 <span style="color:var(--danger);">*</span> 的必填项后再提交</div>
+</div>
+
+<!-- Thank You -->
+<div class="thank-you" id="thankYou">
+  <div class="icon-big">🎉</div>
+  <h2>问卷提交成功！</h2>
+  <p>感谢你的宝贵时间和真诚反馈，这对我们改进产品至关重要。</p>
+</div>
+
+</div><!-- /container -->
+
+<!-- Back to Top -->
+<div class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到顶部">↑</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────
+// 同源部署，留空即可；若前后端分离则填入后端地址
+const API_BASE = '';
+
+// ── State ──
+const STORAGE_KEY = 'dian du ji -survey-v1';
+
+function getAllFields() {
+  const fields = [];
+  // text inputs & textareas
+  document.querySelectorAll('[data-field]').forEach(el => {
+    fields.push(el.getAttribute('data-field'));
+  });
+  // radio groups: collect all group names and also matrix radio names
+  const radioNames = new Set();
+  document.querySelectorAll('input[type="radio"]').forEach(r => {
+    if (r.name) radioNames.add(r.name);
+  });
+  return { textFields: fields, radioNames: [...radioNames] };
+}
+
+function saveState() {
+  const state = {};
+  // text fields
+  document.querySelectorAll('[data-field]').forEach(el => {
+    if (el.type === 'radio') return; // handled below
+    state[el.getAttribute('data-field')] = el.value;
+  });
+  // all radios
+  document.querySelectorAll('input[type="radio"]:checked').forEach(r => {
+    state['radio:' + r.name] = r.value;
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  // show indicator
+  const ind = document.getElementById('autosaveIndicator');
+  ind.classList.add('show');
+  setTimeout(() => ind.classList.remove('show'), 1500);
+}
+
+function loadState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return;
+  let state;
+  try { state = JSON.parse(raw); } catch(e) { return; }
+  // restore text fields
+  document.querySelectorAll('[data-field]').forEach(el => {
+    if (el.type === 'radio') return;
+    const key = el.getAttribute('data-field');
+    if (state[key] !== undefined) el.value = state[key];
+  });
+  // restore radios
+  Object.keys(state).forEach(k => {
+    if (k.startsWith('radio:')) {
+      const name = k.slice(6);
+      const val = state[k];
+      const radio = document.querySelector(`input[type="radio"][name="${CSS.escape(name)}"][value="${CSS.escape(val)}"]`);
+      if (radio) radio.checked = true;
+    }
+  });
+  updateProgress();
+}
+
+// ── Validation ──
+const requiredRadios = [
+  'familiarity',
+  't1_useful', 't1_ease', 't1_satisfy',
+  't2_useful', 't2_ease', 't2_satisfy',
+  't3_useful', 't3_ease', 't3_satisfy',
+  't4_useful', 't4_ease', 't4_satisfy',
+  't5_useful', 't5_ease', 't5_satisfy',
+  't6_useful', 't6_ease', 't6_satisfy',
+  ...Array.from({length:11}, (_,i) => 'sus_' + (i+1)),
+  'overall_willingness',
+];
+
+function isRadioGroupAnswered(name) {
+  return !!document.querySelector(`input[type="radio"][name="${CSS.escape(name)}"]:checked`);
+}
+
+function validateAll() {
+  let allValid = true;
+  // clear previous errors
+  document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+
+  // check required text fields
+  const requiredText = [
+    { sel: '[data-field="name"]', msg: '请填写称呼/昵称' },
+    { sel: '[data-field="date"]', msg: '请选择填写日期' },
+  ];
+  requiredText.forEach(item => {
+    const el = document.querySelector(item.sel);
+    if (!el.value.trim()) {
+      const formGroup = el.closest('.form-group');
+      if (formGroup) formGroup.classList.add('field-error');
+      allValid = false;
+    }
+  });
+
+  // check required radio groups
+  requiredRadios.forEach(name => {
+    if (!isRadioGroupAnswered(name)) {
+      // find the first radio in this group and mark its closest form-group or matrix
+      const radio = document.querySelector(`input[type="radio"][name="${CSS.escape(name)}"]`);
+      if (radio) {
+        // try to find the enclosing form-group, or mark the section
+        const formGroup = radio.closest('.form-group');
+        const section = radio.closest('.section');
+        if (formGroup) formGroup.classList.add('field-error');
+        else if (section) {
+          // for matrix, highlight the matrix-wrap
+          const matrix = radio.closest('.matrix-wrap');
+          if (matrix) {
+            const parentFG = matrix.closest('.form-group');
+            if (parentFG) parentFG.classList.add('field-error');
+          }
+        }
+      }
+      allValid = false;
+    }
+  });
+
+  return allValid;
+}
+
+// ── Progress ──
+function updateProgress() {
+  let answered = 0;
+  let total = 0;
+
+  // count radio groups
+  requiredRadios.forEach(name => {
+    total++;
+    if (isRadioGroupAnswered(name)) answered++;
+  });
+
+  // count required text
+  const requiredTextFields = ['name', 'date'];
+  requiredTextFields.forEach(f => {
+    total++;
+    const el = document.querySelector(`[data-field="${f}"]`);
+    if (el && el.value.trim()) answered++;
+  });
+
+  const pct = total > 0 ? Math.round((answered / total) * 100) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = pct + '%';
+}
+
+// ── Auto-save ──
+let autoSaveTimer;
+function debouncedSave() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(saveState, 800);
+}
+
+// ── Submit ──
+function buildSubmissionPayload() {
+  const payload = {};
+  // text fields
+  document.querySelectorAll('[data-field]').forEach(el => {
+    if (el.type === 'radio') return;
+    payload[el.getAttribute('data-field')] = el.value;
+  });
+  // radio groups — strip the "radio:" prefix
+  document.querySelectorAll('input[type="radio"]:checked').forEach(r => {
+    payload[r.name] = r.value;
+  });
+  return payload;
+}
+
+async function submitForm() {
+  const submitHint = document.getElementById('submitHint');
+  submitHint.classList.remove('show');
+
+  if (!validateAll()) {
+    submitHint.classList.add('show');
+    const firstError = document.querySelector('.field-error');
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    showToast('请完成所有必填项后再提交', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btnSubmit');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<span>提交中…</span>';
+  btn.disabled = true;
+
+  const payload = buildSubmissionPayload();
+
+  try {
+    const res = await fetch(`${API_BASE}/api/submissions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+
+    // 提交成功
+    document.getElementById('formContainer').style.display = 'none';
+    document.getElementById('thankYou').classList.add('show');
+    document.getElementById('submitArea').style.display = 'none';
+    document.querySelector('.progress-wrap').style.display = 'none';
+    document.getElementById('backToTop').classList.remove('show');
+    submitHint.classList.remove('show');
+    localStorage.removeItem(STORAGE_KEY);
+    showToast('提交成功！感谢你的反馈', 'success');
+
+  } catch (err) {
+    console.error('提交失败:', err);
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+
+    // API 不可用时，回退为下载 JSON 文件
+    showToast('自动提交失败，正在下载 JSON 文件作为备份…', 'error');
+    downloadFallbackJSON(payload);
+  }
+}
+
+function downloadFallbackJSON(data) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const timestamp = data['date'] || new Date().toISOString().slice(0,10);
+  const nickname = (data['name'] || 'anonymous').replace(/[^a-zA-Z一-鿿\d_-]/g, '_');
+  a.download = `点读机体验问卷_${nickname}_${timestamp}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  // 同时清除保存的状态并显示感谢页
+  localStorage.removeItem(STORAGE_KEY);
+  document.getElementById('formContainer').style.display = 'none';
+  document.getElementById('thankYou').classList.add('show');
+  document.getElementById('submitArea').style.display = 'none';
+  document.querySelector('.progress-wrap').style.display = 'none';
+  document.getElementById('backToTop').classList.remove('show');
+  document.getElementById('submitHint').classList.remove('show');
+}
+
+function clearForm() {
+  if (!confirm('确定要清空所有填写内容吗？此操作不可撤销。')) return;
+
+  document.querySelectorAll('input[type="text"], input[type="date"], textarea').forEach(el => {
+    if (el.closest('form')) return; // skip if inside a form
+    el.value = '';
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+  document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+  document.getElementById('submitHint').classList.remove('show');
+  document.getElementById('susHint').classList.remove('show');
+  localStorage.removeItem(STORAGE_KEY);
+  updateProgress();
+  showToast('已清空全部内容');
+}
+
+function showToast(msg, type) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast ' + type + ' show';
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// ── Scroll: Back to Top ──
+function updateBackToTop() {
+  const btn = document.getElementById('backToTop');
+  if (window.scrollY > 500) {
+    btn.classList.add('show');
+  } else {
+    btn.classList.remove('show');
+  }
+}
+
+// ── Event binding ──
+document.querySelectorAll('input[type="radio"]').forEach(r => {
+  r.addEventListener('change', () => {
+    updateProgress();
+    debouncedSave();
+    // clear field-error on the containing form-group or section
+    const formGroup = r.closest('.form-group');
+    if (formGroup) formGroup.classList.remove('field-error');
+    const matrix = r.closest('.matrix-wrap');
+    if (matrix) {
+      const fg = matrix.closest('.form-group');
+      if (fg) fg.classList.remove('field-error');
+    }
+    // hide submit hint if now valid
+    if (validateAll()) {
+      document.getElementById('submitHint').classList.remove('show');
+    }
+  });
+});
+
+document.querySelectorAll('input[type="text"], input[type="date"], textarea').forEach(el => {
+  if (el.closest('form')) return;
+  el.addEventListener('input', () => {
+    debouncedSave();
+    updateProgress();
+    const formGroup = el.closest('.form-group');
+    if (formGroup && el.value.trim()) {
+      formGroup.classList.remove('field-error');
+    }
+  });
+});
+
+window.addEventListener('scroll', updateBackToTop, { passive: true });
+window.addEventListener('beforeunload', saveState);
+
+// ── Init ──
+loadState();
+updateProgress();
+updateBackToTop();
+
+// Set today's date as default
+const dateInput = document.querySelector('[data-field="date"]');
+if (dateInput && !dateInput.value) {
+  dateInput.value = new Date().toISOString().slice(0, 10);
+}
+
+console.log('点读机体验问卷已就绪');
+console.log('- API 后端: ' + API_BASE);
+console.log('- 填写数据自动保存到浏览器本地存储');
+console.log('- 提交时 POST 到 API，失败则回退下载 JSON');
+console.log('- ' + requiredRadios.length + ' 个必评量项 + 3 个必填文本项');
+</script>
+</body>
+</html>
